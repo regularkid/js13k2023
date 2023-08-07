@@ -1,6 +1,6 @@
 // Constants
-const sw = 160;
-const sy = 100;
+const sw = 80;
+const sy = 50;
 
 // Global init
 var canvas = document.getElementById("canvas");

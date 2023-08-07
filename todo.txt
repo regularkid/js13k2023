@@ -1,0 +1,6 @@
+---------- TODO ----------
+Setup backups to DropBox somehow (batch file I run as needed?)
+
+---------- DONE ----------
+Basic canvas, framebuffer, game loop, and input
+Initial GitHub setup
