@@ -13,5 +13,8 @@ SET devPath=.\*
 REM Zip up entire dev folder and put it in Dropbox
 call "C:\Program Files\7-Zip\7z.exe" a -tzip %backupPath% %devPath%
 
+REM Display to verify that it worked
+dir /a-d /o-d C:\Users\regul\Dropbox\SuperMicroFun\Projects\js13k_2023_Backups\
+
 REM Wait for user input
 pause
