@@ -2,5 +2,5 @@
 js13k 2023 entry!
 
 ## How to backup to Dropbox
-Run BackupToDropbox.bat
-    - This will zip up entire development directory and put it in the \SuperMicroFun\Projects\js13k_2023_Backups directory.
+- Run BackupToDropbox.bat
+- This will zip up entire development directory and put it in the \SuperMicroFun\Projects\js13k_2023_Backups Dropbox directory.
