@@ -1,6 +1,54 @@
 ---------- TODO ----------
-Setup backups to DropBox somehow (batch file I run as needed?)
+
 
 ---------- DONE ----------
+Setup backups to DropBox somehow (batch file I run as needed?)
 Basic canvas, framebuffer, game loop, and input
 Initial GitHub setup
+
+---------- IDEAS ----------
+Micro RTS - "Invasions"
+    - Year increments from 1200 -> 1300
+    - Goal is survive invasions and last the entire century.
+    - Super pixelated (soldiers are literally single pixels or maybe 2-high).
+    - Waves per decade / 10 years.
+    - Ability to setup defenses at the beginning of each decade and then watch how it plays out.
+    - Pauses between decades to allow you to reinforce defenses or make adjustments before letting next decade play out.
+    - Use random seed for ranomization so that you can replay the same game over and over and try to beat it... then use a different seed for a different game to try to beat.
+    - Castle in the middle that has health bar
+        - Defeat if castle is destroyed
+        - Randomize based on seed?
+    - Map has different colors that affect movement + speed
+        - Grass
+        - Mud
+        - Sand
+        - Rocks
+        - Water
+        - Use proc gen for map
+    - Types
+        - Traits
+            - Move speed
+            - Combat range
+            - Strength / power
+            - Health
+            - Special ability?
+            - Cost
+        - Clear color coding per unit type
+        - Predictable behaviors based on traits
+        - Soldier
+        - Archer
+        - Brute
+        - Spy
+    - Enemies
+        - Same color coding, but with a different outline or something to denote enemy
+        - Arrow of color coding showing where they are coming in from on the side of the screen
+    - Things to do in between decades
+        - Spend points on castle health
+        - Spend points on buying more units
+    - Get points based on
+        - Time alive
+        - Enemy units destroyed
+    - Pathfinding
+    - Need feeling of "soooo close!" or "I just barely beat it!" when finishing the game.
+        - Should feel achievable but very close
+        - Not too much strategy that it seems insurmountable / too difficult
