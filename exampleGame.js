@@ -1,8 +1,10 @@
 // Load assets
-star = LoadSprite("Star.png")
-square = LoadSprite("Square.png")
-knight = LoadSprite("Knight.png")
-sword = LoadSprite("Sword.png")
+star = LoadSprite("Star.png");
+square = LoadSprite("Square.png");
+knight = LoadSprite("Knight.png");
+sword = LoadSprite("Sword.png");
+horse = LoadSprite("Horse.png");
+castle = LoadSprite("Castle.png");
 
 // Example state
 ExampleState = (reason) =>
@@ -48,8 +50,12 @@ class Knight
         this.y = y;
         this.xDest = x;
         this.yDest = y;
-        this.dx = 1.0;
-        this.a = 0;
+        this.dir = 1.0;
+        this.angleBounce = 0;
+        this.moveSpeed = 200.0 + Math.random()*100.0;
+        this.angleSword = 45.0;
+        this.angleSwordSwipeOffset = Math.random()*2.25;
+        this.arrived = false;
     }
 
     tick()
@@ -67,34 +73,40 @@ class Knight
         {
             dx /= len;
             dy /= len;
-            this.dx = (dx >= 0.0) ? 1.0 : -1.0;
+            this.dir = (dx >= 0.0) ? 1.0 : -1.0;
+
+            if (this.angleBounce == 0.0)
+            {
+                this.angleBounce = Math.random()*Math.PI*2.0;
+            }
         }
 
-        let speed = 300.0;
-        let xNew = this.x + (dx * speed * deltaTime);
-        let yNew = this.y + (dy * speed * deltaTime);
+        let xNew = this.x + (dx * this.moveSpeed * deltaTime);
+        let yNew = this.y + (dy * this.moveSpeed * deltaTime);
         let dxNew = (this.xDest - xNew);
         let dyNew = (this.yDest - yNew);
-        let dot = (dx * dxNew) + (dy * dyNew);
-        if (dot > 0)
+        let dotArrived = (dx * dxNew) + (dy * dyNew);
+
+        // Still moving?
+        if (dotArrived > 0)
         {
             this.x = xNew;
             this.y = yNew;
-            this.a += 24.0 * deltaTime;
+            this.arrived = false;
+            this.angleBounce += 24.0 * deltaTime;
+            if (this.angleBounce > Math.PI)
+            {
+                this.angleBounce -= Math.PI*2.0;
+            }
         }
+        // Arrived
         else
         {
             this.x = this.xDest;
             this.y = this.yDest;
-
-            if (this.a > Math.PI)
-            {
-                this.a -= Math.PI*2.0;
-            }
-            else
-            {
-                this.a *= 0.90;
-            }
+            this.arrived = true;
+            this.angleBounce *= 0.90;
+            this.angleSword = 90.0 - Math.abs(Math.sin(this.angleSwordSwipeOffset + performance.now()*0.03))*75.0;
         }
     }
 
@@ -102,40 +114,89 @@ class Knight
     {
         ctx.save();
 
-        let scale = 6.0
-        ctx.save();
-        let yOffset = Math.abs(Math.sin(this.a)) * 5.0;
-        ctx.translate(this.x, this.y - yOffset);
-        ctx.rotate((10.0 * Math.cos(this.a + Math.PI/2)) * Math.PI/180);
+        const scale = 4.0;
+        const yBounceOffsetMax = 5.0;
+        const rotBounceMax = 10.0;
 
-        let xOffset = Math.abs(Math.sin(this.a + 30)) * 10.0;
-        yOffset = Math.abs(Math.sin(this.a + 30)) * 10.0;
+        // Entire characer bounce pos/rot adjustments
+        if (this.arrived)
+        {
+            let yBounceOffset = Math.abs(Math.sin(performance.now() * 0.01 + this.angleSwordSwipeOffset)) * yBounceOffsetMax * 0.75;
+            ctx.translate(this.x, this.y - yBounceOffset);
+        }
+        else
+        {
+            let yBounceOffset = Math.abs(Math.sin(this.angleBounce)) * yBounceOffsetMax;
+            ctx.translate(this.x, this.y - yBounceOffset);
+            ctx.rotate((rotBounceMax * Math.cos(this.angleBounce + Math.PI/2)) * Math.PI/180);
+        }
+
+        // Sword sway pos/rot adjustments
+        const swordSwayOffsetMax = 10.0;
+        const swordSwayOffset = Math.abs(Math.sin(this.angleBounce + 30)) * swordSwayOffsetMax;
         ctx.save();
-        ctx.translate(this.dx * (36 - xOffset), -14 - yOffset);
-        ctx.rotate(this.dx * 45.0 * Math.PI/180);
-        ctx.fillStyle = '#222';
-        ctx.fillRect(-10,-44,20,56);
-        ctx.fillRect(-16,-8,32,14);
-        DrawSprite(sword, 0, -16, 0.0, scale*this.dx, scale);
+        ctx.translate(this.dir * (36 - swordSwayOffset), -(14 + swordSwayOffset));
+        ctx.rotate(this.dir * this.angleSword * Math.PI/180);
+        DrawSprite(sword, 0, -16, 0.0, scale*this.dir, scale);
         ctx.restore();
 
-        scale = 4.0
-        ctx.fillStyle = '#222';
-        ctx.fillRect(-20,-40,40,40);
-        DrawSprite(knight, 0, -20, 0.0, scale*this.dx, scale);
+        // Head
+        DrawSprite(knight, 0, -20, 0.0, scale*this.dir, scale);
 
         ctx.restore();
     }
 }
 
-k = new Knight(64, 64);
+const numKnights = 50;
+const xSpawnMin = -400;
+const xSpawnMax = -100;
+const ySpawnMin = 48;
+const ySpawnMax = 480;
+entities = [];
+for (let i = 0; i < numKnights; i++)
+{
+    let knight = new Knight(xSpawnMin + Math.random()*(xSpawnMax - xSpawnMin), ySpawnMin + Math.random()*(ySpawnMax - ySpawnMin));
+    knight.xDest = 720.0 + Math.random()*50.0;
+    entities.push(knight);
+}
+entities.sort((entity1, entity2) => entity1.y - entity2.y);
+
+const numGroundSpots = 15;
+groundSpots = [];
+// for (let i = 0; i < numGroundSpots; i++)
+// {
+//     groundSpots.push({x:Math.random()*gameWidth, y:Math.random()*gameHeight, r:Math.random()*Math.PI*2, w:50 + Math.random()*150, h:40 + Math.random()*100});
+// }
 
 GameState = (reason) =>
 {
-    clearColor = "#ccae62";
+    clearColor = "#6ab04c";
 
-    k.tick();
-    k.draw();
+    groundSpots.forEach(groundSpot =>
+    {
+        ctx.save();
+        ctx.translate(groundSpot.x, groundSpot.y);
+        ctx.rotate(groundSpot.r);
+        ctx.fillStyle = "#ffbe76";
+        ctx.fillRect(0, 0, groundSpot.w, groundSpot.h);
+        ctx.restore();
+    });
+
+    const xCastle = 820;
+    const yCastle = 0;
+    const yCastleStep = 64;
+    const scale = 4.0;
+    const numCastles = 8;
+    for (let i = 0; i < numCastles; i++)
+    {
+        DrawSprite(castle, xCastle + (i % 2)*5, yCastle + i*yCastleStep, 0.0, scale, scale);
+    }
+
+    entities.forEach(entity =>
+    {
+        entity.tick();
+        entity.draw();
+    });
 }
 
 // Start initial state
